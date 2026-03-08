@@ -179,9 +179,13 @@ Antes de interpretar necesito saber cuál es tu asunto.
                 </button>
               )}
               <div
-                className="text-sm leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br />') }}
-              />
+  className="text-sm leading-relaxed"
+  dangerouslySetInnerHTML={{
+    __html: msg.text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br />')
+  }}
+/>
             </div>
           </div>
         ))}
