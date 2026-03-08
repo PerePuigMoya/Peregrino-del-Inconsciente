@@ -1,5 +1,5 @@
 
-export const GEMINI_MODEL_NAME = "gemini-3-flash-preview";
+export const GEMINI_MODEL_NAME = "gemini-3.1-pro-preview";
 
 export const AI_PERSONA_PEREGRINO = `
 Tu Rol: Eres el Peregrino del Inconsciente. Tu misión es la Terapia Narrativa Sincrónica y el análisis onírico arquetípico.
