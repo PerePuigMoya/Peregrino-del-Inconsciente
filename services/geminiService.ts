@@ -78,7 +78,84 @@ Si ya hay un asunto claro, responde como el Peregrino del Inconsciente ayudando 
     return "El Peregrino ha entrado en un momento de profundo silencio.";
   }
 };
+export const getArchetypalReport = async (
+  history: ChatMessage[],
+  hexagramNumber: number,
+  changingLines: number[]
+): Promise<string> => {
+  try {
+    const ai = getAIClient();
 
+    const chatContext = history
+      .map((m) => `${m.sender === "user" ? "Consultante" : "Peregrino"}: ${m.text}`)
+      .join("\n");
+
+    const userPrompt = `
+${BOLD_INSTRUCTION}
+
+Estás en la sección de Consulta al Peregrino.
+
+Ahora no estás continuando la conversación normal.
+Ahora estás generando un informe arquetípico a partir de la conversación previa.
+
+Reglas de comportamiento para este informe:
+
+- No escribas como en un chat.
+- No uses tono oracular, místico o grandilocuente.
+- Habla de forma humana, clara, ordenada y cercana.
+- No inventes información que no esté en la conversación.
+- Si falta información importante, dilo con honestidad.
+- Usa los datos técnicos internos (Hexagrama ${hexagramNumber}, Líneas ${changingLines.join(",")}) solo como guía energética interna. Nunca los menciones.
+
+Historial de la conversación:
+${chatContext}
+
+Genera el informe con esta estructura:
+
+<strong>1. Tu asunto central</strong>
+Resume de forma clara cuál parece ser el asunto principal del consultante.
+
+<strong>2. El arquetipo desde el que hablas</strong>
+Identifica la energía predominante desde la que parece expresarse.
+
+<strong>3. El conflicto arquetípico principal</strong>
+Describe el bloqueo, tensión o sombra principal.
+
+<strong>4. La dinámica interna</strong>
+Explica qué arquetipos parecen estar en tensión o interacción.
+
+<strong>5. La raíz del problema</strong>
+Señala qué base psicológica podría no estar integrada del todo, si se puede inferir con suficiente fundamento.
+
+<strong>6. La medicina arquetípica</strong>
+Indica qué energía ayudaría a equilibrar la situación.
+
+<strong>7. Clave de integración</strong>
+Formula una reflexión central que ayude al consultante a comprender mejor su proceso.
+
+<strong>8. Preguntas para seguir profundizando</strong>
+Cierra con 2 o 3 preguntas útiles y humanas.
+
+Responde como el Peregrino del Inconsciente.
+`;
+
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: GEMINI_MODEL_NAME,
+      systemInstruction: SYSTEM_INSTRUCTION,
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: userPrompt }],
+        },
+      ],
+    });
+
+    return response.text;
+  } catch (error) {
+    console.error("Error en informe arquetípico:", error);
+    return "Ahora mismo no he podido ordenar la conversación en un informe arquetípico. Inténtalo de nuevo en un momento.";
+  }
+};
 export const getArchetypeDescription = async (
   archetypeName: ArquetipoName
 ): Promise<string> => {
