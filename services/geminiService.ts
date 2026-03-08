@@ -4,10 +4,14 @@ import { GEMINI_MODEL_NAME, AI_PERSONA_PEREGRINO } from '../constants';
 import { ArquetipoName, ARQUETIPOS, ChatMessage } from "../types";
 
 const getAIClient = () => {
-  const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : undefined;
+  // Vite inyectará tu clave directamente aquí al compilar
+  const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+  
   if (!apiKey) {
+    console.error("No se encontró la API Key de Gemini.");
     throw new Error("API_KEY no encontrada");
   }
+  
   return new GoogleGenAI({ apiKey });
 };
 
