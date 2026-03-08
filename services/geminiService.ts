@@ -22,28 +22,43 @@ const SYSTEM_INSTRUCTION = {
 };
 
 export const getOraculoInterpretation = async (
-  userQuestion: string,
+  history: ChatMessage[],
   hexagramNumber: number,
   changingLines: number[]
 ): Promise<string> => {
   try {
     const ai = getAIClient();
 
+    const chatContext = history
+      .map((m) => `${m.sender === "user" ? "Consultante" : "Peregrino"}: ${m.text}`)
+      .join("\n");
+
     const userPrompt = `
 ${BOLD_INSTRUCTION}
 
-Tarea: Analiza la consulta y determina la dinámica arquetípica. Usa los datos técnicos internos (Hexagrama ${hexagramNumber}, Líneas ${changingLines.join(",")}) solo como guía de energía, pero no los nombres.
+Estás en la sección de Consulta al Peregrino.
 
-Pregunta del usuario: "${userQuestion}"
+Reglas de comportamiento para esta sección:
 
-Estructura de respuesta obligatoria:
-1. <strong>La Voz que Pregunta</strong>: Identifica desde qué arquetipo está hablando el consultante.
-2. <strong>El Arquetipo en la Sombra</strong>: Describe el bloqueo o desafío actual.
-3. <strong>La Medicina Arquetípica</strong>: Indica qué OTRO arquetipo es necesario para equilibrar.
-4. <strong>Acción Simbólica</strong>: Sugerencia práctica.
-5. <strong>Pregunta de Reflexión</strong>.
+- Si el consultante solo ha saludado o todavía no ha explicado su asunto, no hagas ninguna interpretación arquetípica.
+- En ese caso responde de forma natural, humana y breve, invitando al consultante a explicar qué quiere explorar.
+- Si el consultante ya ha explicado una situación, conflicto, duda o momento vital, entonces puedes comenzar el análisis arquetípico.
+- No utilices siempre una estructura fija.
+- No conviertas cada respuesta en una pieza poética u oracular.
+- Prioriza una conversación humana y natural.
+- Puedes hacer preguntas para profundizar antes de cerrar una interpretación.
+- Solo usa arquetipos cuando haya suficiente información.
+- Usa los datos técnicos internos (Hexagrama ${hexagramNumber}, Líneas ${changingLines.join(",")}) solo como guía energética interna. Nunca los menciones.
 
-Firma como "Peregrino del Inconsciente".
+Historial de la conversación:
+${chatContext}
+
+Si todavía no hay asunto claro, responde con algo sencillo como:
+"Hola. ¿Qué te gustaría explorar hoy?"
+o
+"Cuéntame un poco más sobre lo que está pasando."
+
+Si ya hay un asunto claro, responde como el Peregrino del Inconsciente ayudando a comprender la situación de forma natural, cercana y clara.
 `;
 
     const response: GenerateContentResponse = await ai.models.generateContent({
@@ -73,6 +88,9 @@ export const getArchetypeDescription = async (
     const userPrompt = `
 Presenta el arquetipo: <strong>${archetypeName}</strong>.
 ${BOLD_INSTRUCTION}
+
+Habla de forma clara, cercana y comprensible.
+No uses un tono excesivamente solemne ni oracular.
 `;
 
     const response: GenerateContentResponse = await ai.models.generateContent({
@@ -106,14 +124,25 @@ export const getDreamInterpretation = async (
     const userPrompt = `
 ${BOLD_INSTRUCTION}
 
-Estás analizando un sueño.
-Si es el primer mensaje, identifica arquetipos y símbolos, y haz preguntas sobre la subjetividad de los mismos.
-Si es una respuesta del consultante sobre sus sentimientos o significados, integra esa información para dar una conclusión más profunda sobre el mensaje del sueño.
+Estás en la sección de Interpretación de Sueños.
+
+Reglas de comportamiento para esta sección:
+
+- Si el consultante todavía no ha contado un sueño, no lo interpretes.
+- En ese caso responde pidiendo que lo relate con más detalle.
+- Si el sueño ya ha sido contado, analiza símbolos, emociones y posibles dinámicas arquetípicas.
+- No afirmes significados universales cerrados.
+- Haz preguntas para profundizar en el significado subjetivo del sueño.
+- Prioriza una conversación humana, clara y natural.
+- No uses un tono excesivamente oracular o literario.
 
 Historial del diálogo onírico:
 ${chatContext}
 
-Responde como el Peregrino, manteniendo el enfoque en la construcción mutua del significado.
+Si todavía no hay sueño claro, responde con algo sencillo como:
+"Cuéntame el sueño con el mayor detalle que recuerdes."
+
+Si ya hay sueño, responde como el Peregrino manteniendo el enfoque en la construcción conjunta del significado.
 `;
 
     const response: GenerateContentResponse = await ai.models.generateContent({
