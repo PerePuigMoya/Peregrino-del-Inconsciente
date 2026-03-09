@@ -5,97 +5,98 @@ body {
 
 /* Modo lectura ampliada */
 .large-text {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .large-text p,
 .large-text li,
 .large-text label,
 .large-text a {
-  font-size: 1.12em !important;
-  line-height: 1.75 !important;
+  font-size: 1.2em !important;
+  line-height: 1.85 !important;
 }
 
 .large-text span,
 .large-text div {
-  line-height: 1.75 !important;
+  line-height: 1.85 !important;
 }
 
 .large-text button,
 .large-text input,
 .large-text textarea,
 .large-text select {
-  font-size: 18px !important;
-  line-height: 1.5 !important;
+  font-size: 20px !important;
+  line-height: 1.6 !important;
 }
 
 .large-text h1 {
-  font-size: 2.2rem !important;
+  font-size: 2.4rem !important;
   line-height: 1.25 !important;
 }
 
 .large-text h2 {
-  font-size: 1.9rem !important;
+  font-size: 2.1rem !important;
   line-height: 1.3 !important;
 }
 
 .large-text h3 {
-  font-size: 1.6rem !important;
+  font-size: 1.8rem !important;
   line-height: 1.35 !important;
 }
 
 .large-text h4,
 .large-text h5,
 .large-text h6 {
-  font-size: 1.35rem !important;
+  font-size: 1.55rem !important;
   line-height: 1.4 !important;
 }
 
+/* Botones y campos más cómodos de tocar */
 .large-text input,
 .large-text textarea,
 .large-text button {
-  min-height: 48px;
+  min-height: 52px;
 }
 
 /* Sobrescribe clases típicas de Tailwind */
 .large-text .text-xs {
-  font-size: 0.95rem !important;
+  font-size: 1.05rem !important;
 }
 
 .large-text .text-sm {
-  font-size: 1.08rem !important;
+  font-size: 1.2rem !important;
 }
 
 .large-text .text-base {
-  font-size: 1.15rem !important;
+  font-size: 1.3rem !important;
 }
 
 .large-text .text-lg {
-  font-size: 1.25rem !important;
-}
-
-.large-text .text-xl {
   font-size: 1.45rem !important;
 }
 
+.large-text .text-xl {
+  font-size: 1.65rem !important;
+}
+
 .large-text .text-2xl {
-  font-size: 1.7rem !important;
+  font-size: 1.9rem !important;
 }
 
 .large-text .text-3xl {
-  font-size: 1.95rem !important;
+  font-size: 2.2rem !important;
 }
 
 /* Sobrescribe tamaños arbitrarios que usas en la app */
 .large-text .text-\[10px\] {
-  font-size: 14px !important;
+  font-size: 16px !important;
 }
 
 .large-text .text-\[16px\] {
-  font-size: 20px !important;
+  font-size: 22px !important;
 }
 
 /* Mejora la legibilidad de bloques de chat */
 .large-text .leading-relaxed {
-  line-height: 1.9 !important;
+  line-height: 2 !important;
 }
