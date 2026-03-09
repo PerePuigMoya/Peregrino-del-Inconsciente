@@ -13,9 +13,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigateHome, showHomeButto
 
   return (
     <div
-      className={`min-h-screen flex flex-col bg-[#372523] text-[#DAD9D5] ${
-        largeText ? 'text-[18px]' : 'text-base'
-      }`}
+      className={`min-h-screen flex flex-col bg-[#372523] text-[#DAD9D5] ${largeText ? 'large-text' : ''}`}
     >
       <header className="p-3 sm:p-4 sticky top-0 bg-[#372523]/80 backdrop-blur-md z-10 border-b border-[#83454A]/20">
         <div className="flex items-center justify-between gap-2 min-w-0">
