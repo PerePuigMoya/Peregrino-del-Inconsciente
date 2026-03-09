@@ -1,9 +1,7 @@
-/* Estilo base opcional */
 body {
   font-family: 'Georgia', 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
 }
 
-/* Modo lectura ampliada */
 .large-text {
   font-size: 20px;
 }
@@ -31,6 +29,145 @@ body {
 
 .large-text h1 {
   font-size: 2.4rem !important;
+  line-height: 1.25 !important;
+}
+
+.large-text h2 {
+  font-size: 2.1rem !important;
+  line-height: 1.3 !important;
+}
+
+.large-text h3 {
+  font-size: 1.8rem !important;
+  line-height: 1.35 !important;
+}
+
+.large-text h4,
+.large-text h5,
+.large-text h6 {
+  font-size: 1.55rem !important;
+  line-height: 1.4 !important;
+}
+
+.large-text input,
+.large-text textarea,
+.large-text button {
+  min-height: 52px;
+}
+
+.large-text .text-xs {
+  font-size: 1.05rem !important;
+}
+
+.large-text .text-sm {
+  font-size: 1.2rem !important;
+}
+
+.large-text .text-base {
+  font-size: 1.3rem !important;
+}
+
+.large-text .text-lg {
+  font-size: 1.45rem !important;
+}
+
+.large-text .text-xl {
+  font-size: 1.65rem !important;
+}
+
+.large-text .text-2xl {
+  font-size: 1.9rem !important;
+}
+
+.large-text .text-3xl {
+  font-size: 2.2rem !important;
+}
+
+.large-text .text-\[10px\] {
+  font-size: 16px !important;
+}
+
+.large-text .text-\[16px\] {
+  font-size: 22px !important;
+}
+
+.large-text .leading-relaxed {
+  line-height: 2 !important;
+}
+
+.xlarge-text {
+  font-size: 24px;
+}
+
+.xlarge-text p,
+.xlarge-text li,
+.xlarge-text label,
+.xlarge-text a {
+  font-size: 1.3em !important;
+  line-height: 2 !important;
+}
+
+.xlarge-text span,
+.xlarge-text div {
+  line-height: 2 !important;
+}
+
+.xlarge-text button,
+.xlarge-text input,
+.xlarge-text textarea,
+.xlarge-text select {
+  font-size: 24px !important;
+}
+
+.xlarge-text h1 {
+  font-size: 2.6rem !important;
+}
+
+.xlarge-text h2 {
+  font-size: 2.3rem !important;
+}
+
+.xlarge-text h3 {
+  font-size: 2rem !important;
+}
+
+.xlarge-text h4,
+.xlarge-text h5,
+.xlarge-text h6 {
+  font-size: 1.7rem !important;
+}
+
+.xlarge-text .text-xs {
+  font-size: 1.2rem !important;
+}
+
+.xlarge-text .text-sm {
+  font-size: 1.35rem !important;
+}
+
+.xlarge-text .text-base {
+  font-size: 1.5rem !important;
+}
+
+.xlarge-text .text-lg {
+  font-size: 1.7rem !important;
+}
+
+.xlarge-text .text-xl {
+  font-size: 2rem !important;
+}
+
+.xlarge-text .text-2xl {
+  font-size: 2.3rem !important;
+}
+
+.xlarge-text .text-\[10px\] {
+  font-size: 18px !important;
+}
+
+.xlarge-text .text-\[16px\] {
+  font-size: 26px !important;
+}
   line-height: 1.25 !important;
 }
 
