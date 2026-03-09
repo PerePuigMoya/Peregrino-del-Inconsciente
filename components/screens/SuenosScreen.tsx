@@ -1,29 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send as SendIcon, ClipboardCopy as CopyIcon, Check as CheckIcon, Moon } from 'lucide-react';
 import { ChatMessage } from '../../types';
-import { getDreamInterpretation } from '../../services/geminiService';
+import { getDreamInterpretation, getDreamReport } from '../../services/geminiService';
 
 const SuenosScreen: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [userInput, setUserInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMessages([
-      {
-        id: 'start-suenos',
-        sender: 'ai',
-        text: `Hola caminante.
-
-Cuéntame tu sueño con el mayor detalle que recuerdes.
-
-¿Dónde estabas? ¿Quién aparecía? ¿Qué sucedía? ¿Cómo te sentías dentro del sueño?`,
-        timestamp: new Date(),
-      },
-    ]);
-  }, []);
 
   const handleCopy = async (text: string, id: string) => {
     try {
@@ -45,20 +31,19 @@ Cuéntame tu sueño con el mayor detalle que recuerdes.
   useEffect(() => {
     const timer = setTimeout(scrollToBottom, 300);
     return () => clearTimeout(timer);
-  }, [messages, isLoading]);
+  }, [messages, isLoading, isGeneratingReport]);
 
   const handleSendMessage = async () => {
-    if (!userInput.trim() || isLoading) return;
+    if (!userInput.trim() || isLoading || isGeneratingReport) return;
 
-    const userMsg = userInput.trim();
-
+    const userMsg = userInput;
     const newUserMessage: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
       text: userMsg,
       timestamp: new Date(),
     };
-    
+
     const updatedMessages = [...messages, newUserMessage];
     setMessages(updatedMessages);
     setUserInput('');
@@ -74,8 +59,6 @@ Cuéntame tu sueño con el mayor detalle que recuerdes.
       };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error("Error en sueños:", error);
-
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
@@ -85,6 +68,38 @@ Cuéntame tu sueño con el mayor detalle que recuerdes.
       setMessages(prev => [...prev, aiMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGenerateDreamReport = async () => {
+    if (messages.length < 3 || isLoading || isGeneratingReport) return;
+
+    setIsGeneratingReport(true);
+
+    try {
+      const response = await getDreamReport(messages);
+
+      const aiMessage: ChatMessage = {
+        id: `dream-report-${Date.now()}`,
+        sender: 'ai',
+        text: response,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error generando informe del sueño:', error);
+
+      const aiMessage: ChatMessage = {
+        id: `dream-report-error-${Date.now()}`,
+        sender: 'ai',
+        text: 'Ahora mismo no he podido ordenar el sueño en un informe. Inténtalo de nuevo en un momento.',
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } finally {
+      setIsGeneratingReport(false);
     }
   };
 
@@ -99,15 +114,23 @@ Cuéntame tu sueño con el mayor detalle que recuerdes.
       </div>
 
       <div className="flex-grow overflow-y-auto p-4 space-y-6 scrollbar-hide overscroll-contain bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] bg-fixed">
+        {messages.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center opacity-60 text-center px-8 py-12">
+            <div className="w-16 h-16 border-2 border-[#83454A] rounded-full flex items-center justify-center mb-6 animate-pulse">
+              <Moon size={32} className="text-[#DC6E47]" />
+            </div>
+            <h3 className="text-[#DC6E47] text-xl font-serif mb-2">¿Qué has soñado, caminante?</h3>
+            <p className="italic text-sm text-[#B0AEB6]">"Los sueños son cartas enviadas por el inconsciente que aún no hemos abierto."</p>
+          </div>
+        )}
+
         {messages.map((msg) => (
           <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`relative group max-w-[90%] p-4 rounded-2xl ${
-                msg.sender === 'user'
-                  ? 'bg-[#83454A] text-white rounded-tr-none shadow-lg'
-                  : 'bg-[#4a3a38] text-[#DAD9D5] rounded-tl-none border border-[#83454A]/20 shadow-xl'
-              }`}
-            >
+            <div className={`relative group max-w-[90%] p-4 rounded-2xl ${
+              msg.sender === 'user'
+                ? 'bg-[#83454A] text-white rounded-tr-none shadow-lg'
+                : 'bg-[#4a3a38] text-[#DAD9D5] rounded-tl-none border border-[#83454A]/20 shadow-xl'
+            }`}>
               {msg.sender === 'ai' && (
                 <button
                   onClick={() => handleCopy(msg.text, msg.id)}
@@ -118,13 +141,17 @@ Cuéntame tu sueño con el mayor detalle que recuerdes.
               )}
               <div
                 className="text-sm leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br />') }}
+                dangerouslySetInnerHTML={{
+                  __html: msg.text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br />')
+                }}
               />
             </div>
           </div>
         ))}
 
-        {isLoading && (
+        {(isLoading || isGeneratingReport) && (
           <div className="flex justify-start">
             <div className="bg-[#4a3a38] p-4 rounded-2xl rounded-tl-none animate-pulse flex items-center space-x-2 border border-[#83454A]/20">
               <div className="flex space-x-1">
@@ -140,19 +167,31 @@ Cuéntame tu sueño con el mayor detalle que recuerdes.
       </div>
 
       <div className="p-4 bg-[#372523] border-t border-[#83454A]/30 shrink-0">
+        {messages.length >= 3 && (
+          <div className="mb-3 flex justify-end">
+            <button
+              onClick={handleGenerateDreamReport}
+              disabled={isLoading || isGeneratingReport}
+              className="px-4 py-2 text-sm rounded-full border border-[#83454A]/50 text-[#DAD9D5] hover:border-[#DC6E47] hover:text-[#DC6E47] transition-colors disabled:opacity-40"
+            >
+              {isGeneratingReport ? 'Ordenando informe...' : 'Recibir informe del sueño'}
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center space-x-2 bg-[#4a3a38] rounded-full px-4 py-1 border border-[#83454A]/50 focus-within:border-[#DC6E47] transition-colors shadow-inner">
           <input
             type="text"
             className="flex-grow bg-transparent border-none focus:ring-0 text-[#DAD9D5] text-[16px] py-2 placeholder-[#B0AEB6]/50 outline-none"
-            placeholder={messages.length <= 1 ? "Cuéntame tu sueño..." : "Responde al Peregrino..."}
+            placeholder={messages.length === 0 ? "Describe tu sueño aquí..." : "Responde al Peregrino..."}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-            disabled={isLoading}
+            disabled={isLoading || isGeneratingReport}
           />
           <button
             onClick={handleSendMessage}
-            disabled={!userInput.trim() || isLoading}
+            disabled={!userInput.trim() || isLoading || isGeneratingReport}
             className="text-[#DC6E47] disabled:text-[#B0AEB6]/30 transition-colors p-1"
           >
             <SendIcon size={20} />
