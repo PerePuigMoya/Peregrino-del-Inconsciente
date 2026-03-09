@@ -5,20 +5,28 @@ body {
 
 /* Modo lectura ampliada */
 .large-text {
-  font-size: 1.15rem;
+  font-size: 18px;
 }
 
 .large-text p,
-.large-text span,
-.large-text div,
 .large-text li,
 .large-text label,
-.large-text a,
+.large-text a {
+  font-size: 1.12em !important;
+  line-height: 1.75 !important;
+}
+
+.large-text span,
+.large-text div {
+  line-height: 1.75 !important;
+}
+
 .large-text button,
 .large-text input,
-.large-text textarea {
-  font-size: 1.1em !important;
-  line-height: 1.6 !important;
+.large-text textarea,
+.large-text select {
+  font-size: 18px !important;
+  line-height: 1.5 !important;
 }
 
 .large-text h1 {
@@ -49,13 +57,45 @@ body {
   min-height: 48px;
 }
 
-.large-text [class*="text-xs"],
-.large-text [class*="text-sm"],
-.large-text [class*="text-base"],
-.large-text [class*="text-lg"],
-.large-text [class*="text-xl"],
-.large-text [class*="text-2xl"],
-.large-text [class*="text-3xl"] {
-  font-size: 1.1em !important;
-  line-height: 1.6 !important;
+/* Sobrescribe clases típicas de Tailwind */
+.large-text .text-xs {
+  font-size: 0.95rem !important;
+}
+
+.large-text .text-sm {
+  font-size: 1.08rem !important;
+}
+
+.large-text .text-base {
+  font-size: 1.15rem !important;
+}
+
+.large-text .text-lg {
+  font-size: 1.25rem !important;
+}
+
+.large-text .text-xl {
+  font-size: 1.45rem !important;
+}
+
+.large-text .text-2xl {
+  font-size: 1.7rem !important;
+}
+
+.large-text .text-3xl {
+  font-size: 1.95rem !important;
+}
+
+/* Sobrescribe tamaños arbitrarios que usas en la app */
+.large-text .text-\[10px\] {
+  font-size: 14px !important;
+}
+
+.large-text .text-\[16px\] {
+  font-size: 20px !important;
+}
+
+/* Mejora la legibilidad de bloques de chat */
+.large-text .leading-relaxed {
+  line-height: 1.9 !important;
 }
