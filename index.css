@@ -1,0 +1,61 @@
+/* Estilo base opcional */
+body {
+  font-family: 'Georgia', 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+
+/* Modo lectura ampliada */
+.large-text {
+  font-size: 1.15rem;
+}
+
+.large-text p,
+.large-text span,
+.large-text div,
+.large-text li,
+.large-text label,
+.large-text a,
+.large-text button,
+.large-text input,
+.large-text textarea {
+  font-size: 1.1em !important;
+  line-height: 1.6 !important;
+}
+
+.large-text h1 {
+  font-size: 2.2rem !important;
+  line-height: 1.25 !important;
+}
+
+.large-text h2 {
+  font-size: 1.9rem !important;
+  line-height: 1.3 !important;
+}
+
+.large-text h3 {
+  font-size: 1.6rem !important;
+  line-height: 1.35 !important;
+}
+
+.large-text h4,
+.large-text h5,
+.large-text h6 {
+  font-size: 1.35rem !important;
+  line-height: 1.4 !important;
+}
+
+.large-text input,
+.large-text textarea,
+.large-text button {
+  min-height: 48px;
+}
+
+.large-text [class*="text-xs"],
+.large-text [class*="text-sm"],
+.large-text [class*="text-base"],
+.large-text [class*="text-lg"],
+.large-text [class*="text-xl"],
+.large-text [class*="text-2xl"],
+.large-text [class*="text-3xl"] {
+  font-size: 1.1em !important;
+  line-height: 1.6 !important;
+}
