@@ -218,10 +218,10 @@ Antes de interpretar necesito saber cuál es tu asunto.
           </div>
         )}
 
-        <div className="flex items-center space-x-2 bg-[#372523] rounded-full px-4 py-1 border border-[#83454A]/50 focus-within:border-[#DC6E47] transition-colors shadow-inner">
-          <input
-            type="text"
-            className="flex-grow bg-transparent border-none focus:ring-0 text-[#DAD9D5] text-[16px] py-2 placeholder-[#B0AEB6]/50 outline-none"
+       <div className="flex items-center gap-2 min-w-0 bg-[#372523] rounded-full px-3 sm:px-4 py-1 border border-[#83454A]/50 focus-within:border-[#DC6E47] transition-colors shadow-inner">
+  <input
+    type="text"
+    className="flex-1 min-w-0 bg-transparent border-none focus:ring-0 text-[#DAD9D5] text-[16px] py-2 placeholder-[#B0AEB6]/50 outline-none"
             placeholder={messages.length <= 1 ? 'Cuéntame cuál es tu asunto...' : 'Responde al Peregrino...'}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
