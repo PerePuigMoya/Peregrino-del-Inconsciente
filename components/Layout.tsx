@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Home, Compass, ZoomIn, ZoomOut } from 'lucide-react';
 import Button from './ui/Button';
 
@@ -9,12 +9,23 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, onNavigateHome, showHomeButton }) => {
-  const [largeText, setLargeText] = useState(false);
+  const [largeText, setLargeText] = useState<boolean>(false);
+
+  useEffect(() => {
+    const savedPreference = localStorage.getItem('peregrino-large-text');
+    if (savedPreference === 'true') {
+      setLargeText(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('peregrino-large-text', String(largeText));
+  }, [largeText]);
 
   return (
     <div
       className={`min-h-screen flex flex-col bg-[#372523] text-[#DAD9D5] ${
-        largeText ? 'text-[18px]' : 'text-base'
+        largeText ? 'text-[18px] md:text-[20px]' : 'text-base'
       }`}
     >
       <header className="p-4 sticky top-0 bg-[#372523]/80 backdrop-blur-md z-10 flex items-center justify-between gap-4">
@@ -32,11 +43,12 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigateHome, showHomeButto
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setLargeText((prev) => !prev)}
-            className="px-3 py-2 rounded-lg border border-[#83454A]/50 text-[#DAD9D5] hover:border-[#DC6E47] hover:text-[#DC6E47] transition-colors"
+            className="px-3 py-2 rounded-lg border border-[#83454A]/50 text-[#DAD9D5] hover:border-[#DC6E47] hover:text-[#DC6E47] transition-colors flex items-center gap-2"
             aria-label={largeText ? 'Reducir tamaño de texto' : 'Aumentar tamaño de texto'}
             title={largeText ? 'Reducir tamaño de texto' : 'Aumentar tamaño de texto'}
           >
             {largeText ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
+            <span className="text-sm font-medium">{largeText ? 'A-' : 'A+'}</span>
           </button>
 
           {showHomeButton && (
