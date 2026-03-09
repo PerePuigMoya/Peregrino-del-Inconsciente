@@ -229,12 +229,13 @@ Antes de interpretar necesito saber cuál es tu asunto.
             disabled={isLoading || isGeneratingReport}
           />
           <button
-            onClick={handleSendMessage}
-            disabled={!userInput.trim() || isLoading || isGeneratingReport}
-            className="text-[#DC6E47] disabled:text-[#B0AEB6]/30 transition-colors p-1"
-          >
-            <SendIcon size={20} />
-          </button>
+  onClick={handleSendMessage}
+  disabled={!userInput.trim() || isLoading || isGeneratingReport}
+  className="text-[#DC6E47] disabled:text-[#B0AEB6]/30 transition-colors p-2 shrink-0"
+  aria-label="Enviar mensaje"
+>
+  <SendIcon size={20} />
+</button>
         </div>
       </div>
     </div>
