@@ -23,11 +23,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigateHome, showHomeButto
   }, [largeText]);
 
   return (
-    <div
-      className={`min-h-screen flex flex-col bg-[#372523] text-[#DAD9D5] ${
-        largeText ? 'text-[18px] md:text-[20px]' : 'text-base'
-      }`}
-    >
+    <div className={`min-h-screen flex flex-col bg-[#372523] text-[#DAD9D5] ${largeText ? 'large-text' : ''}`}>
       <header className="p-4 sticky top-0 bg-[#372523]/80 backdrop-blur-md z-10 flex items-center justify-between gap-4">
         <div className="flex items-center min-w-0">
           <img
@@ -35,23 +31,23 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigateHome, showHomeButto
             alt="El Peregrino del Inconsciente"
             className="w-10 h-10 mr-3 rounded-full shrink-0"
           />
-          <span className="text-sm tracking-wide truncate">
+          <span className="text-base md:text-lg font-medium tracking-wide truncate">
             El Peregrino del Inconsciente
           </span>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <button
-  onClick={() => setLargeText((prev) => !prev)}
-  className="px-4 py-3 rounded-xl border-2 border-[#DC6E47] bg-[#4a3a38] text-[#FFF5EE] hover:bg-[#5b4a48] hover:scale-[1.02] transition-all flex items-center gap-3 shadow-md"
-  aria-label={largeText ? 'Reducir tamaño de texto' : 'Aumentar tamaño de texto'}
-  title={largeText ? 'Reducir tamaño de texto' : 'Aumentar tamaño de texto'}
->
-  {largeText ? <ZoomOut size={22} /> : <ZoomIn size={22} />}
-  <span className="text-base font-semibold tracking-wide">
-    {largeText ? 'Texto normal' : 'Aumentar texto'}
-  </span>
-</button>
+            onClick={() => setLargeText((prev) => !prev)}
+            className="px-4 py-3 rounded-xl border-2 border-[#DC6E47] bg-[#4a3a38] text-[#FFF5EE] hover:bg-[#5b4a48] hover:scale-[1.02] transition-all flex items-center gap-3 shadow-md"
+            aria-label={largeText ? 'Reducir tamaño de texto' : 'Aumentar tamaño de texto'}
+            title={largeText ? 'Reducir tamaño de texto' : 'Aumentar tamaño de texto'}
+          >
+            {largeText ? <ZoomOut size={22} /> : <ZoomIn size={22} />}
+            <span className="text-base font-semibold tracking-wide">
+              {largeText ? 'Texto normal' : 'Aumentar texto'}
+            </span>
+          </button>
 
           {showHomeButton && (
             <Button
