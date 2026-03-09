@@ -9,12 +9,11 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, onNavigateHome, showHomeButton }) => {
-  const [largeText, setLargeText] = useState(false);
-
+  const [textSize, setTextSize] = useState(0);
   return (
-    <div
-      className={`min-h-screen flex flex-col bg-[#372523] text-[#DAD9D5] ${largeText ? 'large-text' : ''}`}
-    >
+    <div className={`min-h-screen flex flex-col bg-[#372523] text-[#DAD9D5] ${
+  textSize === 1 ? 'large-text' : textSize === 2 ? 'xlarge-text' : ''
+}`}>
       <header className="p-3 sm:p-4 sticky top-0 bg-[#372523]/80 backdrop-blur-md z-10 border-b border-[#83454A]/20">
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center min-w-0 flex-1">
@@ -30,7 +29,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigateHome, showHomeButto
 
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => setLargeText((prev) => !prev)}
+              onClick={() => setTextSize((prev) => (prev + 1) % 3)}
               className="p-2 rounded-lg border border-[#83454A]/50 text-[#DAD9D5] hover:border-[#DC6E47] hover:text-[#DC6E47] transition-colors shrink-0"
               aria-label={largeText ? 'Reducir tamaño de texto' : 'Aumentar tamaño de texto'}
               title={largeText ? 'Reducir tamaño de texto' : 'Aumentar tamaño de texto'}
