@@ -1,5 +1,9 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
-import { GEMINI_MODEL_NAME, AI_PERSONA_PEREGRINO } from "../constants";
+import {
+  GEMINI_CHAT_MODEL_NAME,
+  GEMINI_REPORT_MODEL_NAME,
+  AI_PERSONA_PEREGRINO,
+} from "../constants";
 import { ArquetipoName, ChatMessage } from "../types";
 
 const getAIClient = () => {
@@ -21,14 +25,62 @@ const SYSTEM_INSTRUCTION = {
   parts: [{ text: AI_PERSONA_PEREGRINO }],
 };
 
+const isQuotaError = (error: unknown): boolean => {
+  const message = String(error || "");
+  return (
+    message.includes('"code":429') ||
+    message.includes("RESOURCE_EXHAUSTED") ||
+    message.includes("Quota exceeded")
+  );
+};
+
+const getFriendlyErrorMessage = (error: unknown, fallback: string): string => {
+  if (isQuotaError(error)) {
+    return "Hoy el Peregrino ha alcanzado su límite diario de consultas. Vuelve a intentarlo más tarde.";
+  }
+  return fallback;
+};
+
+const generateWithModel = async (
+  model: string,
+  userPrompt: string
+): Promise<string> => {
+  const ai = getAIClient();
+
+  const response: GenerateContentResponse = await ai.models.generateContent({
+    model,
+    systemInstruction: SYSTEM_INSTRUCTION,
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: userPrompt }],
+      },
+    ],
+  });
+
+  return response.text;
+};
+
+const generateReportWithFallback = async (userPrompt: string): Promise<string> => {
+  try {
+    return await generateWithModel(GEMINI_REPORT_MODEL_NAME, userPrompt);
+  } catch (error) {
+    console.error("Error con modelo de informe, probando fallback:", error);
+
+    if (isQuotaError(error)) {
+      return await generateWithModel(GEMINI_CHAT_MODEL_NAME, userPrompt);
+    }
+
+    throw error;
+  }
+};
+
 export const getOraculoInterpretation = async (
   history: ChatMessage[],
   hexagramNumber: number,
   changingLines: number[]
 ): Promise<string> => {
   try {
-    const ai = getAIClient();
-
     const chatContext = history
       .map((m) => `${m.sender === "user" ? "Consultante" : "Peregrino"}: ${m.text}`)
       .join("\n");
@@ -94,21 +146,13 @@ o
 Si ya hay un asunto claro, responde como el Peregrino del Inconsciente ayudando a comprender la situación de forma natural, cercana y clara.
 `;
 
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: GEMINI_MODEL_NAME,
-      systemInstruction: SYSTEM_INSTRUCTION,
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: userPrompt }],
-        },
-      ],
-    });
-
-    return response.text;
+    return await generateWithModel(GEMINI_CHAT_MODEL_NAME, userPrompt);
   } catch (error) {
     console.error("Error en el Oráculo:", error);
-    return "El Peregrino ha entrado en un momento de profundo silencio.";
+    return getFriendlyErrorMessage(
+      error,
+      "El Peregrino ha entrado en un momento de profundo silencio."
+    );
   }
 };
 
@@ -118,8 +162,6 @@ export const getArchetypalReport = async (
   changingLines: number[]
 ): Promise<string> => {
   try {
-    const ai = getAIClient();
-
     const chatContext = history
       .map((m) => `${m.sender === "user" ? "Consultante" : "Peregrino"}: ${m.text}`)
       .join("\n");
@@ -178,21 +220,13 @@ Cierra con 2 o 3 preguntas útiles y humanas.
 Responde como el Peregrino del Inconsciente.
 `;
 
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: GEMINI_MODEL_NAME,
-      systemInstruction: SYSTEM_INSTRUCTION,
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: userPrompt }],
-        },
-      ],
-    });
-
-    return response.text;
+    return await generateReportWithFallback(userPrompt);
   } catch (error) {
     console.error("Error en informe arquetípico:", error);
-    return "Ahora mismo no he podido ordenar la conversación en un informe arquetípico. Inténtalo de nuevo en un momento.";
+    return getFriendlyErrorMessage(
+      error,
+      "Ahora mismo no he podido ordenar la conversación en un informe arquetípico. Inténtalo de nuevo en un momento."
+    );
   }
 };
 
@@ -200,8 +234,6 @@ export const getArchetypeDescription = async (
   archetypeName: ArquetipoName
 ): Promise<string> => {
   try {
-    const ai = getAIClient();
-
     const userPrompt = `
 Presenta el arquetipo: <strong>${archetypeName}</strong>.
 ${BOLD_INSTRUCTION}
@@ -210,21 +242,13 @@ Habla de forma clara, cercana y comprensible.
 No uses un tono excesivamente solemne ni oracular.
 `;
 
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: GEMINI_MODEL_NAME,
-      systemInstruction: SYSTEM_INSTRUCTION,
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: userPrompt }],
-        },
-      ],
-    });
-
-    return response.text;
+    return await generateWithModel(GEMINI_CHAT_MODEL_NAME, userPrompt);
   } catch (error) {
     console.error("Error en descripción de arquetipo:", error);
-    return "La sabiduría de los arquetipos se encuentra velada.";
+    return getFriendlyErrorMessage(
+      error,
+      "La sabiduría de los arquetipos se encuentra velada."
+    );
   }
 };
 
@@ -232,8 +256,6 @@ export const getDreamInterpretation = async (
   history: ChatMessage[]
 ): Promise<string> => {
   try {
-    const ai = getAIClient();
-
     const chatContext = history
       .map((m) => `${m.sender === "user" ? "Consultante" : "Peregrino"}: ${m.text}`)
       .join("\n");
@@ -262,21 +284,13 @@ Si todavía no hay sueño claro, responde con algo sencillo como:
 Si ya hay sueño, responde como el Peregrino manteniendo el enfoque en la construcción conjunta del significado.
 `;
 
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: GEMINI_MODEL_NAME,
-      systemInstruction: SYSTEM_INSTRUCTION,
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: userPrompt }],
-        },
-      ],
-    });
-
-    return response.text;
+    return await generateWithModel(GEMINI_CHAT_MODEL_NAME, userPrompt);
   } catch (error) {
     console.error("Error en interpretación de sueños:", error);
-    return "Las nieblas del sueño son densas ahora mismo. Intentemos conectar más tarde.";
+    return getFriendlyErrorMessage(
+      error,
+      "Las nieblas del sueño son densas ahora mismo. Intentemos conectar más tarde."
+    );
   }
 };
 
@@ -284,8 +298,6 @@ export const getDreamReport = async (
   history: ChatMessage[]
 ): Promise<string> => {
   try {
-    const ai = getAIClient();
-
     const chatContext = history
       .map((m) => `${m.sender === "user" ? "Consultante" : "Peregrino"}: ${m.text}`)
       .join("\n");
@@ -336,20 +348,12 @@ Cierra con 2 o 3 preguntas útiles, humanas y abiertas para seguir explorándolo
 Responde como el Peregrino del Inconsciente.
 `;
 
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: GEMINI_MODEL_NAME,
-      systemInstruction: SYSTEM_INSTRUCTION,
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: userPrompt }],
-        },
-      ],
-    });
-
-    return response.text;
+    return await generateReportWithFallback(userPrompt);
   } catch (error) {
     console.error("Error en informe de sueño:", error);
-    return "Ahora mismo no he podido ordenar el sueño en un informe. Inténtalo de nuevo en un momento.";
+    return getFriendlyErrorMessage(
+      error,
+      "Ahora mismo no he podido ordenar el sueño en un informe. Inténtalo de nuevo en un momento."
+    );
   }
 };
