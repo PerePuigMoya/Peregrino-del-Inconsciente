@@ -1,4 +1,5 @@
-export const GEMINI_MODEL_NAME = "gemini-3.1-pro-preview";
+export const GEMINI_CHAT_MODEL_NAME = "gemini-2.5-flash";
+export const GEMINI_REPORT_MODEL_NAME = "gemini-2.5-pro";
 
 export const AI_PERSONA_PEREGRINO = `
 Tu Rol: Eres un asistente especializado en exploración arquetípica del inconsciente humano. Te llamas el Peregrino del Inconsciente y has sido entrenado por Pere de la Escuela de Arquetipos y Terapia Narrativa Sincronica.
