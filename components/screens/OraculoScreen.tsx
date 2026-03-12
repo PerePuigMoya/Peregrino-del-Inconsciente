@@ -1,10 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send as SendIcon, ClipboardCopy as CopyIcon, Check as CheckIcon } from 'lucide-react';
+import {
+  Send as SendIcon,
+  ClipboardCopy as CopyIcon,
+  Check as CheckIcon,
+  Trash2,
+  Files,
+} from 'lucide-react';
 import { ChatMessage } from '../../types';
 import {
   getOraculoInterpretation,
   getArchetypalReport,
 } from '../../services/geminiService';
+
+const STORAGE_KEY = 'peregrino_oraculo_conversation';
+
+const getInitialMessages = (): ChatMessage[] => [
+  {
+    id: 'start-oraculo',
+    sender: 'ai',
+    text: `Hola caminante.
+
+Antes de interpretar necesito saber cuál es tu asunto.
+
+¿Qué situación, conflicto, duda o momento de tu vida quieres explorar hoy?`,
+    timestamp: new Date(),
+  },
+];
 
 const OraculoScreen: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -12,26 +33,47 @@ const OraculoScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [conversationCopied, setConversationCopied] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMessages([
-      {
-        id: 'start-oraculo',
-        sender: 'ai',
-        text: `Hola caminante.
+    try {
+      const savedConversation = localStorage.getItem(STORAGE_KEY);
 
-Antes de interpretar necesito saber cuál es tu asunto.
+      if (savedConversation) {
+        const parsed: ChatMessage[] = JSON.parse(savedConversation).map((msg: ChatMessage) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
 
-¿Qué situación, conflicto, duda o momento de tu vida quieres explorar hoy?`,
-        timestamp: new Date(),
-      },
-    ]);
+        if (parsed.length > 0) {
+          setMessages(parsed);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar la conversación guardada:', error);
+    }
+
+    setMessages(getInitialMessages());
   }, []);
+
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch (error) {
+      console.error('Error al guardar la conversación en localStorage:', error);
+    }
+  }, [messages]);
 
   const handleCopy = async (text: string, id: string) => {
     try {
-      const cleanText = text.replace(/<[^>]*>/g, '');
+      const cleanText = text
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]*>/g, '');
+
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(cleanText);
         setCopiedId(id);
@@ -40,6 +82,48 @@ Antes de interpretar necesito saber cuál es tu asunto.
     } catch (err) {
       console.error('Error al copiar:', err);
     }
+  };
+
+  const handleCopyConversation = async () => {
+    try {
+      const fullConversation = messages
+        .map((msg) => {
+          const speaker = msg.sender === 'user' ? 'Tú' : 'Peregrino';
+          const cleanText = msg.text
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<[^>]*>/g, '');
+
+          return `${speaker}:\n${cleanText}`;
+        })
+        .join('\n\n');
+
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(fullConversation);
+        setConversationCopied(true);
+        setTimeout(() => setConversationCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error('Error al copiar la conversación:', err);
+    }
+  };
+
+  const handleClearConversation = () => {
+    const confirmed = window.confirm(
+      '¿Seguro que quieres borrar toda la conversación? Esta acción no se puede deshacer.'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('Error al borrar la conversación guardada:', error);
+    }
+
+    setMessages(getInitialMessages());
+    setUserInput('');
+    setCopiedId(null);
+    setConversationCopied(false);
   };
 
   const scrollToBottom = () => {
@@ -174,18 +258,21 @@ Antes de interpretar necesito saber cuál es tu asunto.
                 <button
                   onClick={() => handleCopy(msg.text, msg.id)}
                   className="absolute -top-2 -right-2 p-1.5 bg-[#4a3a38] border border-[#83454A]/40 rounded-full text-[#B0AEB6] hover:text-[#DC6E47] transition-all z-10"
+                  aria-label="Copiar mensaje"
+                  title="Copiar mensaje"
                 >
                   {copiedId === msg.id ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
                 </button>
               )}
+
               <div
-  className="text-sm leading-relaxed"
-  dangerouslySetInnerHTML={{
-    __html: msg.text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br />')
-  }}
-/>
+                className="text-sm leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: msg.text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br />'),
+                }}
+              />
             </div>
           </div>
         ))}
@@ -206,22 +293,40 @@ Antes de interpretar necesito saber cuál es tu asunto.
       </div>
 
       <div className="p-4 bg-[#372523]/30 border-t border-[#83454A]/30 shrink-0">
-        {messages.length >= 3 && (
-          <div className="mb-3 flex justify-end">
+        <div className="mb-3 flex flex-wrap justify-between gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
-              onClick={handleGenerateReport}
-              disabled={isLoading || isGeneratingReport}
-              className="px-4 py-2 text-sm rounded-full border border-[#83454A]/50 text-[#DAD9D5] hover:border-[#DC6E47] hover:text-[#DC6E47] transition-colors disabled:opacity-40"
+              onClick={handleCopyConversation}
+              disabled={messages.length === 0 || isLoading || isGeneratingReport}
+              className="px-4 py-2 text-sm rounded-full border border-[#83454A]/50 text-[#DAD9D5] hover:border-[#DC6E47] hover:text-[#DC6E47] transition-colors disabled:opacity-40 flex items-center gap-2"
             >
-              {isGeneratingReport ? 'Ordenando informe...' : 'Recibir informe arquetípico'}
+              {conversationCopied ? <CheckIcon size={16} /> : <Files size={16} />}
+              {conversationCopied ? 'Copiada' : 'Copiar conversación'}
+            </button>
+
+            <button
+              onClick={handleClearConversation}
+              disabled={isLoading || isGeneratingReport}
+              className="px-4 py-2 text-sm rounded-full border border-[#83454A]/50 text-[#DAD9D5] hover:border-[#DC6E47] hover:text-[#DC6E47] transition-colors disabled:opacity-40 flex items-center gap-2"
+            >
+              <Trash2 size={16} />
+              Borrar conversación
             </button>
           </div>
-        )}
 
-       <div className="flex items-center gap-2 min-w-0 bg-[#372523] rounded-full px-3 sm:px-4 py-1 border border-[#83454A]/50 focus-within:border-[#DC6E47] transition-colors shadow-inner">
-  <input
-    type="text"
-    className="flex-1 min-w-0 bg-transparent border-none focus:ring-0 text-[#DAD9D5] text-[16px] py-2 placeholder-[#B0AEB6]/50 outline-none"
+          <button
+            onClick={handleGenerateReport}
+            disabled={messages.length < 3 || isLoading || isGeneratingReport}
+            className="px-4 py-2 text-sm rounded-full border border-[#83454A]/50 text-[#DAD9D5] hover:border-[#DC6E47] hover:text-[#DC6E47] transition-colors disabled:opacity-40"
+          >
+            {isGeneratingReport ? 'Ordenando informe...' : 'Recibir informe arquetípico'}
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 min-w-0 bg-[#372523] rounded-full px-3 sm:px-4 py-1 border border-[#83454A]/50 focus-within:border-[#DC6E47] transition-colors shadow-inner">
+          <input
+            type="text"
+            className="flex-1 min-w-0 bg-transparent border-none focus:ring-0 text-[#DAD9D5] text-[16px] py-2 placeholder-[#B0AEB6]/50 outline-none"
             placeholder={messages.length <= 1 ? 'Cuéntame cuál es tu asunto...' : 'Responde al Peregrino...'}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
@@ -229,13 +334,14 @@ Antes de interpretar necesito saber cuál es tu asunto.
             disabled={isLoading || isGeneratingReport}
           />
           <button
-  onClick={handleSendMessage}
-  disabled={!userInput.trim() || isLoading || isGeneratingReport}
-  className="text-[#DC6E47] disabled:text-[#B0AEB6]/30 transition-colors p-2 shrink-0"
-  aria-label="Enviar mensaje"
->
-  <SendIcon size={20} />
-</button>
+            onClick={handleSendMessage}
+            disabled={!userInput.trim() || isLoading || isGeneratingReport}
+            className="text-[#DC6E47] disabled:text-[#B0AEB6]/30 transition-colors p-2 shrink-0"
+            aria-label="Enviar mensaje"
+            title="Enviar mensaje"
+          >
+            <SendIcon size={20} />
+          </button>
         </div>
       </div>
     </div>
